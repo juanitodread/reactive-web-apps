@@ -1,0 +1,4 @@
+# Routes
+
+# Application controller
+GET         /reactive/index                         controllers.Application.index

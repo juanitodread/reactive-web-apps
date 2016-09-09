@@ -10,7 +10,7 @@
     <logger name="play" level="INFO" />
     <logger name="application" level="ALL" />
     
-    <root level="ERROR">
+    <root level="INFO">
         <appender-ref ref ="stdout" />
     </root>
 </configuration>
