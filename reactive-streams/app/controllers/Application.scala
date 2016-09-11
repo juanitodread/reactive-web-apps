@@ -22,6 +22,13 @@ import play.api.Logger
 
 import play.api.mvc.Action
 import play.api.mvc.Controller
+import service.TwitterStreamService
+import service.TwitterStreamService
+import play.api.mvc.WebSocket
+import play.api.libs.iteratee.Iteratee
+import play.api.libs.iteratee.Enumerator
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.iteratee.Concurrent
 
 /**
  * Default app controller
@@ -33,8 +40,27 @@ class Application extends Controller {
   final val logger = Logger(this.getClass)
 
   def index = Action { request =>
-    logger.info("Entry to index")
+    logger.info(s"Entry to index - request: $request")
 
     Ok("Hello World :)")
   }
+
+  def sayHelloWebSocket = WebSocket.using[String] { request =>
+    logger.info(s"Entry to sayHelloWebSocket - request: $request")
+
+    // Concurrent.broadcast returns (Enumerator, Concurrent.Channel)
+    val (out, channel) = Concurrent.broadcast[String]
+
+    // log the message to stdout and send response back to client
+    val in = Iteratee.foreach[String] {
+      msg =>
+        logger.info(s"Message received: $msg")
+
+        // the Enumerator returned by Concurrent.broadcast subscribes to the channel and will
+        // receive the pushed messages
+        channel.push(s"Hello from server! I have received your message: $msg")
+    }
+    (in, out)
+  }
+
 }
