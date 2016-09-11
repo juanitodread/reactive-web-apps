@@ -19,16 +19,12 @@
 package controllers
 
 import play.api.Logger
-
-import play.api.mvc.Action
-import play.api.mvc.Controller
-import service.TwitterStreamService
-import service.TwitterStreamService
-import play.api.mvc.WebSocket
-import play.api.libs.iteratee.Iteratee
-import play.api.libs.iteratee.Enumerator
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.Concurrent
+import play.api.libs.iteratee.Iteratee
+import play.api.mvc.Action
+import play.api.mvc.Controller
+import play.api.mvc.WebSocket
 
 /**
  * Default app controller
