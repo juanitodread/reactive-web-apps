@@ -100,4 +100,29 @@ class Application @Inject() (ws: WSClient) extends Controller {
     }
   }
 
+  def postTweet(message: String) = Action.async { request =>
+    logger.info(s"Entry to postTweet - request: $request")
+
+    message match {
+      case msg if msg.length <= 140 => {
+        Common.oAuthAccess.map {
+          case (key, token) =>
+            val url = "https://api.twitter.com/1.1/statuses/update.json"
+            val tweet = Map("status" -> Seq(message))
+            val responseFuture = ws.url(url)
+              .sign(OAuthCalculator(key, token))
+              .post(tweet)
+
+            responseFuture.map { response =>
+              Ok(response.body)
+            }
+        } getOrElse {
+          logger.error("Credentials not found")
+          Future.successful(InternalServerError("Credentials not found"))
+        }
+      }
+      case _ => Future.successful(BadRequest("Invalid length for tweet"))
+    }
+  }
+
 }
