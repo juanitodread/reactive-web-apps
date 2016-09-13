@@ -105,10 +105,14 @@ class Application @Inject() (ws: WSClient) extends Controller {
 
     message match {
       case msg if msg.length <= 140 => {
+
         Common.oAuthAccess.map {
           case (key, token) =>
             val url = "https://api.twitter.com/1.1/statuses/update.json"
             val tweet = Map("status" -> Seq(message))
+
+            logger.info(s"Tweeting: $tweet to $url")
+
             val responseFuture = ws.url(url)
               .sign(OAuthCalculator(key, token))
               .post(tweet)
@@ -121,7 +125,9 @@ class Application @Inject() (ws: WSClient) extends Controller {
           Future.successful(InternalServerError("Credentials not found"))
         }
       }
-      case _ => Future.successful(BadRequest("Invalid length for tweet"))
+      case _ =>
+        logger.error("Invalid length for tweet")
+        Future.successful(BadRequest("Invalid length for tweet"))
     }
   }
 
