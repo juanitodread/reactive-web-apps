@@ -78,6 +78,8 @@ class Application @Inject() (ws: WSClient) extends Controller {
     val query = q.getOrElse("reactive")
     val url = "https://api.twitter.com/1.1/search/tweets.json"
 
+    logger.info(s"Url: $url, Query: $query, Max results: $results")
+
     Common.oAuthAccess.map {
       case (key, token) =>
         val responseFuture = ws.url(url)
@@ -94,7 +96,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
         }
     } getOrElse {
       logger.error("Credentials not found")
-      Future.successful(NotFound("Credentianls not found"))
+      Future.successful(InternalServerError("Credentials not found"))
     }
   }
 
