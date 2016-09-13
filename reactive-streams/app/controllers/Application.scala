@@ -18,13 +18,25 @@
  */
 package controllers
 
+import scala.concurrent.Future
+
+import javax.inject.Inject
+
+import model.Tweet
+import model.TweetFormat._
+
 import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.iteratee.Iteratee
+import play.api.libs.json.Json
+import play.api.libs.oauth.OAuthCalculator
+import play.api.libs.ws.WSClient
 import play.api.mvc.Action
 import play.api.mvc.Controller
 import play.api.mvc.WebSocket
+
+import util.Common
 
 /**
  * Default app controller
@@ -32,7 +44,7 @@ import play.api.mvc.WebSocket
  * @author juanitodread
  *
  */
-class Application extends Controller {
+class Application @Inject() (ws: WSClient) extends Controller {
   final val logger = Logger(this.getClass)
 
   def index = Action { request =>
@@ -57,6 +69,33 @@ class Application extends Controller {
         channel.push(s"Hello from server! I have received your message: $msg")
     }
     (in, out)
+  }
+
+  def tweetList(q: Option[String]) = Action.async { request =>
+    logger.info(s"Entry to tweetList - request: $request")
+
+    val results = 10
+    val query = q.getOrElse("reactive")
+    val url = "https://api.twitter.com/1.1/search/tweets.json"
+
+    Common.oAuthAccess.map {
+      case (key, token) =>
+        val responseFuture = ws.url(url)
+          .sign(OAuthCalculator(key, token))
+          .withQueryString(
+            "q" -> query,
+            "count" -> results.toString
+          ).get
+
+        responseFuture.map { response =>
+          val tweets = (response.json \ "statuses").validate[List[Tweet]]
+            .getOrElse(List[Tweet]())
+          Ok(Json.toJson(tweets))
+        }
+    } getOrElse {
+      logger.error("Credentials not found")
+      Future.successful(NotFound("Credentianls not found"))
+    }
   }
 
 }

@@ -3,3 +3,4 @@
 # Application controller
 GET         /reactive/index                         controllers.Application.index
 GET         /reactive/hello                         controllers.Application.sayHelloWebSocket
+GET         /reactive/tweetslist                    controllers.Application.tweetList(q: Option[String])
