@@ -18,9 +18,13 @@
  */
 package util
 
+import model.TweetFormat._
+import play.api.Logger
+
 import play.api.Play
 import play.api.Play.current
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.iteratee.Iteratee
 import play.api.libs.oauth.ConsumerKey
 import play.api.libs.oauth.RequestToken
 
@@ -42,6 +46,10 @@ object Common {
   def oAuthAccess() = twitterCredentials map {
     case (apiKey, apiSecret, token, tokenSecret) =>
       (ConsumerKey(apiKey, apiSecret), RequestToken(token, tokenSecret))
+  }
+
+  def loggingIteratee(logger: Logger) = Iteratee.foreach[Array[Byte]] { array =>
+    logger.info(array.map(x => x.toChar).mkString)
   }
 
 }

@@ -131,4 +131,23 @@ class Application @Inject() (ws: WSClient) extends Controller {
     }
   }
 
+  def tweeterStream(track: String) = Action.async { request =>
+    val url = "https://stream.twitter.com/1.1/statuses/filter.json"
+    Common.oAuthAccess.map {
+      case (key, token) =>
+
+        val responseFuture = ws.url(url)
+          .sign(OAuthCalculator(key, token))
+          .withQueryString("track" -> track)
+          .get(response => Common.loggingIteratee(logger))
+
+        responseFuture.map { response =>
+          Ok("Stream closed")
+        }
+    } getOrElse {
+      logger.error("Credentials not found")
+      Future.successful(InternalServerError("Credentials not found"))
+    }
+  }
+
 }
