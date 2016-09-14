@@ -132,6 +132,8 @@ class Application @Inject() (ws: WSClient) extends Controller {
   }
 
   def tweeterStream(track: String) = Action.async { request =>
+    logger.info(s"Entry to tweeterStream - request: $request")
+
     val url = "https://stream.twitter.com/1.1/statuses/filter.json"
     Common.oAuthAccess.map {
       case (key, token) =>
