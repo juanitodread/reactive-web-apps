@@ -34,7 +34,7 @@ object TweetFormat {
   implicit val tweetWrites: OWrites[Tweet] = (
     (JsPath \ "author").write[String] and
     (JsPath \ "created").write[String] and
-    (JsPath \ "text" \ "screen_name").write[String]
+    (JsPath \ "text").write[String]
   )(unlift(Tweet.unapply))
 
   implicit val tweetReads: Reads[Tweet] = (
