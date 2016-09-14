@@ -138,10 +138,18 @@ class Application @Inject() (ws: WSClient) extends Controller {
     Common.oAuthAccess.map {
       case (key, token) =>
 
+        // Create iteratee and enumerator
+        val (iteratee, enumerator) = Concurrent.joined[Array[Byte]]
+
+        // Send enumerator to our newTweetStream to transform to 
+        // Enumerator of Tweet 
+        val tweetStream = Common.newTweetStream(enumerator)
+        tweetStream.run(Common.loggingTweetIteratee(logger))
+
         val responseFuture = ws.url(url)
           .sign(OAuthCalculator(key, token))
           .withQueryString("track" -> track)
-          .get(response => Common.loggingIteratee(logger))
+          .get(response => iteratee)
 
         responseFuture.map { response =>
           Ok("Stream closed")
