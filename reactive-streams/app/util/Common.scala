@@ -19,7 +19,6 @@
 package util
 
 import model.Tweet
-
 import model.TweetFormat._
 
 import play.api.Logger
@@ -29,8 +28,11 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.Enumeratee
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.iteratee.Iteratee
+import play.api.libs.json.JsValue
+import play.api.libs.json.Json
 import play.api.libs.oauth.ConsumerKey
 import play.api.libs.oauth.RequestToken
+
 import play.extras.iteratees.Encoding
 import play.extras.iteratees.JsonIteratees
 
@@ -58,16 +60,16 @@ object Common {
     logger.info(array.map(x => x.toChar).mkString)
   }
 
-  def loggingTweetIteratee(logger: Logger) = Iteratee.foreach[Tweet] { tweet =>
+  def loggingTweetIteratee(logger: Logger) = Iteratee.foreach[JsValue] { tweet =>
     logger.info(tweet.toString)
   }
 
-  def newTweetStream(enumerator: Enumerator[Array[Byte]]): Enumerator[Tweet] = {
+  def newTweetStream(enumerator: Enumerator[Array[Byte]]): Enumerator[JsValue] = {
     enumerator &>
       Encoding.decode() &>
       Enumeratee.grouped(JsonIteratees.jsValue) &>
       Enumeratee.map { js =>
-        js.validate[Tweet].getOrElse(Tweet("", "", ""))
+        Json.toJson(js.validate[Tweet].getOrElse(Tweet("", "", "")))
       }
   }
 
