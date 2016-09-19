@@ -6,3 +6,4 @@ GET         /reactive/hello                         controllers.Application.sayH
 GET         /reactive/tweetslist                    controllers.Application.tweetList(q: Option[String])
 GET         /reactive/postTweet                     controllers.Application.postTweet(message: String)
 GET         /reactive/tweeterStream                 controllers.Application.tweeterStream(track: String)
+GET         /reactive/tweeterActorStream            controllers.Application.tweeterActorStream(track: String)

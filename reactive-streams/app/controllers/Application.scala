@@ -20,15 +20,19 @@ package controllers
 
 import scala.concurrent.Future
 
+import actors.TwitterStreamer
+
 import javax.inject.Inject
 
 import model.Tweet
 import model.TweetFormat._
 
 import play.api.Logger
+import play.api.Play.current
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.iteratee.Iteratee
+import play.api.libs.json.JsValue
 import play.api.libs.json.Json
 import play.api.libs.oauth.OAuthCalculator
 import play.api.libs.ws.WSClient
@@ -158,6 +162,10 @@ class Application @Inject() (ws: WSClient) extends Controller {
       logger.error("Credentials not found")
       Future.successful(InternalServerError("Credentials not found"))
     }
+  }
+
+  def tweeterActorStream(track: String) = WebSocket.acceptWithActor[String, JsValue] { request => out =>
+    TwitterStreamer.props(out, track)
   }
 
 }
