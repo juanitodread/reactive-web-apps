@@ -54,7 +54,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
   def index = Action { request =>
     logger.info(s"Entry to index - request: $request")
 
-    Ok("Hello World :)")
+    Ok(views.html.index())
   }
 
   def sayHelloWebSocket = WebSocket.using[String] { request =>
