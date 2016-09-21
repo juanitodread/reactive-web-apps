@@ -61,6 +61,8 @@ object TwitterStreamer {
     val url = "https://stream.twitter.com/1.1/statuses/filter.json"
     Common.oAuthAccess.map {
       case (key, token) =>
+        logger.info("Starting connection with Actor")
+        logger.info(s"Track: $track")
 
         // Create iteratee and enumerator
         val (iteratee, enumerator) = Concurrent.joined[Array[Byte]]
@@ -73,6 +75,7 @@ object TwitterStreamer {
         broadcastEnumerator = Some(be)
 
         WS.url(url)
+          .withRequestTimeout(-1)
           .sign(OAuthCalculator(key, token))
           .postAndRetrieveStream(Map("track" -> Seq(track))) { response =>
             logger.info(s"Status: ${response.status}")

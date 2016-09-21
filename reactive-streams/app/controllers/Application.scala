@@ -51,7 +51,7 @@ import util.Common
 class Application @Inject() (ws: WSClient) extends Controller {
   final val logger = Logger(this.getClass)
 
-  def index = Action { implicit request =>
+  def index(track: Option[String]) = Action { implicit request =>
     logger.info(s"Entry to index - request: $request")
 
     Ok(views.html.index())

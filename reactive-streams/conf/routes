@@ -1,7 +1,7 @@
 # Routes
 
 # Application controller
-GET         /reactive/index                         controllers.Application.index
+GET         /reactive/index                         controllers.Application.index(track: Option[String])
 GET         /reactive/hello                         controllers.Application.sayHelloWebSocket
 GET         /reactive/tweetslist                    controllers.Application.tweetList(q: Option[String])
 GET         /reactive/postTweet                     controllers.Application.postTweet(message: String)

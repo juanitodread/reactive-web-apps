@@ -1,6 +1,13 @@
 @* scripts Template File *@
+@()(implicit request: RequestHeader)
+
+<script type="text/javascript">
+  var url = "@routes.Application.tweeterActorStream("").webSocketURL()" + "@request.getQueryString("track").getOrElse("reactive")";
+</script>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>  
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/js/bootstrap-notify.min.js"></script>
+
+
+<script src="@routes.Assets.versioned("js/bootstrap-notify.min.js")"></script>
+<script src="@routes.Assets.versioned("js/reactive-web-app.js")"></script>
