@@ -164,8 +164,14 @@ class Application @Inject() (ws: WSClient) extends Controller {
     }
   }
 
-  def tweeterActorStream(track: String) = WebSocket.acceptWithActor[String, JsValue] { request => out =>
-    TwitterStreamer.props(out, track)
+  def tweeterActorStream(track: String) = WebSocket.acceptWithActor[String, JsValue] { request => 
+    logger.info(s"Entry to tweeterActorStream - request: $request")
+    out => TwitterStreamer.props(out, track)
+  }
+  
+  def replicaTweeterActorStream(track: String) = Action { request =>
+    logger.info(s"Entry to replicaTweeterActorStream - request: $request")
+    Ok.feed(TwitterStreamer.subscribeNode(track))
   }
 
 }
