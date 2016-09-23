@@ -28,7 +28,7 @@ $(document).ready(function() {
     // YYYY/MM/DD HH:MM:SS
     function parseTwitterDate(text) {
         var d = new Date(Date.parse(text.replace(/( +)/, ' UTC$1')));
-        return "" + d.getFullYear() + "/" + d.getMonth() + "/" + d.getDate() + 
+        return "" + d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate() + 
                " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
     }
 

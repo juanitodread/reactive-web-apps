@@ -58,7 +58,10 @@ object TwitterStreamer {
   def props(out: ActorRef, track: String) = Props(new TwitterStreamer(out, track))
 
   def connect(track: String): Unit = {
-    val url = "https://stream.twitter.com/1.1/statuses/filter.json"
+    val definedMasterUrl = Option(System.getProperty("masterUrl"))
+    val url = definedMasterUrl.getOrElse("https://stream.twitter.com/1.1/statuses/filter.json")
+    val isMaster = definedMasterUrl.isEmpty
+    logger.info(s"Url: $url")
     Common.oAuthAccess.map {
       case (key, token) =>
         logger.info("Starting connection with Actor")
@@ -69,7 +72,7 @@ object TwitterStreamer {
 
         // Send enumerator to our newTweetStream to transform to 
         // Enumerator of Tweet 
-        val tweetStream = Common.newTweetStream(enumerator)
+        val tweetStream = Common.newTweetStream(enumerator, isMaster)
 
         val (be, _) = Concurrent.broadcast(tweetStream)
         broadcastEnumerator = Some(be)
@@ -77,7 +80,7 @@ object TwitterStreamer {
         WS.url(url)
           .withRequestTimeout(-1)
           .sign(OAuthCalculator(key, token))
-          .postAndRetrieveStream(Map("track" -> Seq(track))) { response =>
+          .withQueryString("track" -> track).get { response =>
             logger.info(s"Status: ${response.status}")
             iteratee
           }.map { _ =>
@@ -90,7 +93,7 @@ object TwitterStreamer {
 
   def subscribe(out: ActorRef, track: String): Unit = {
     logger.info(s"Entry to subscribe: ActorRef: $out, track: $track")
-    
+
     if (broadcastEnumerator.isEmpty) {
       connect(track)
     }
@@ -101,9 +104,10 @@ object TwitterStreamer {
       enumerator run twitterClient
     }
   }
-  
+
   def subscribeNode(track: String): Enumerator[JsValue] = {
-    if(broadcastEnumerator.isEmpty) {
+    logger.info(s"Entry to subscribeNode: track: $track")
+    if (broadcastEnumerator.isEmpty) {
       connect(track)
     }
     broadcastEnumerator.getOrElse(Enumerator.empty[JsValue])

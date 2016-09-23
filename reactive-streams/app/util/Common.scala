@@ -64,13 +64,19 @@ object Common {
     logger.info(tweet.toString)
   }
 
-  def newTweetStream(enumerator: Enumerator[Array[Byte]]): Enumerator[JsValue] = {
-    enumerator &>
-      Encoding.decode() &>
-      Enumeratee.grouped(JsonIteratees.jsValue) &>
-      Enumeratee.map { js =>
-        Json.toJson(js.validate[Tweet].getOrElse(Tweet("", "", "")))
-      }
+  def newTweetStream(enumerator: Enumerator[Array[Byte]], isMaster: Boolean): Enumerator[JsValue] = {
+    if (isMaster) {
+      enumerator &>
+        Encoding.decode() &>
+        Enumeratee.grouped(JsonIteratees.jsValue) &>
+        Enumeratee.map { js =>
+          Json.toJson(js.validate[Tweet].getOrElse(Tweet("", "", "")))
+        }
+    } else {
+      enumerator &>
+        Encoding.decode() &>
+        Enumeratee.grouped(JsonIteratees.jsValue)
+    }
   }
 
 }
