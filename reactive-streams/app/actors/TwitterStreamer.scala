@@ -89,6 +89,8 @@ object TwitterStreamer {
   }
 
   def subscribe(out: ActorRef, track: String): Unit = {
+    logger.info(s"Entry to subscribe: ActorRef: $out, track: $track")
+    
     if (broadcastEnumerator.isEmpty) {
       connect(track)
     }
@@ -98,6 +100,13 @@ object TwitterStreamer {
     broadcastEnumerator.foreach { enumerator =>
       enumerator run twitterClient
     }
+  }
+  
+  def subscribeNode(track: String): Enumerator[JsValue] = {
+    if(broadcastEnumerator.isEmpty) {
+      connect(track)
+    }
+    broadcastEnumerator.getOrElse(Enumerator.empty[JsValue])
   }
 
 }
